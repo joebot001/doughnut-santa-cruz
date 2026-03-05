@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>California Doughnut Economics Snapshot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.4rem);
+            color: #bdc3c7;
+            font-weight: 400;
+            margin-bottom: 20px;
+        }
+
+        .overview {
+            background: rgba(52, 152, 219, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            margin-top: 20px;
+        }
+
+        .overview p {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        @media (min-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr 400px;
+            }
+        }
+
+        .doughnut-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 40px 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            min-height: 600px;
+        }
+
+        .doughnut-wrapper {
+            position: relative;
+        }
+
+        .instructions {
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            height: fit-content;
+        }
+
+        .instructions h2 {
+            color: #3498db;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .instructions p {
+            margin-bottom: 15px;
+            color: #bdc3c7;
+        }
+
+        .legend {
+            margin-top: 30px;
+        }
+
+        .legend h3 {
+            color: #e74c3c;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            margin-right: 12px;
+        }
+
+        .thriving { background-color: rgb(34, 139, 34); }
+        .good { background-color: rgb(50, 205, 50); }
+        .near { background-color: rgb(154, 205, 50); }
+        .concerning { background-color: rgb(255, 215, 0); }
+        .shortfall { background-color: rgb(255, 165, 0); }
+        .severe { background-color: rgb(220, 20, 60); }
+        .unknown { background-color: rgb(200, 200, 200); }
+
+        /* Detail Panel Styles */
+        .detail-panel {
+            position: fixed;
+            top: 0;
+            right: -500px;
+            width: 500px;
+            height: 100vh;
+            background: #1e1e1e;
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.5);
+            transition: right 0.3s ease-in-out;
+            z-index: 1001;
+            overflow-y: auto;
+            border-left: 3px solid #3498db;
+        }
+
+        .detail-panel.visible {
+            right: 0;
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            position: sticky;
+            top: 0;
+            z-index: 1002;
+        }
+
+        .detail-header h3 {
+            color: #ffffff;
+            font-size: 1.5rem;
+            margin: 0;
+            flex: 1;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .close-btn:hover {
+            background-color: rgba(231, 76, 60, 0.3);
+        }
+
+        .detail-content {
+            padding: 20px;
+        }
+
+        .detail-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #333;
+        }
+
+        .detail-section:last-child {
+            border-bottom: none;
+        }
+
+        .detail-section h4 {
+            color: #3498db;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            border-left: 3px solid #3498db;
+            padding-left: 12px;
+        }
+
+        .indicator-value {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498db;
+        }
+
+        .status-shortfall {
+            color: #e74c3c;
+            font-weight: 600;
+            padding: 10px;
+            background: rgba(231, 76, 60, 0.1);
+            border-radius: 6px;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .status-overshoot {
+            color: #e67e22;
+            font-weight: 600;
+            padding: 10px;
+            background: rgba(230, 126, 34, 0.1);
+            border-radius: 6px;
+            border-left: 4px solid #e67e22;
+        }
+
+        .data-year {
+            color: #95a5a6;
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+
+        .action-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .action-list li {
+            background: #2a2a2a;
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #27ae60;
+            position: relative;
+        }
+
+        .action-list li::before {
+            content: "→";
+            color: #27ae60;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .detail-section a {
+            color: #3498db;
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .detail-section a:hover {
+            border-bottom-color: #3498db;
+        }
+
+        /* Mobile responsive detail panel */
+        @media (max-width: 768px) {
+            .detail-panel {
+                width: 100vw;
+                right: -100vw;
+            }
+            
+            .detail-panel.visible {
+                right: 0;
+            }
+            
+            .detail-header h3 {
+                font-size: 1.3rem;
+            }
+        }
+
+        footer {
+            background: #2a2a2a;
+            padding: 30px;
+            text-align: center;
+            border-radius: 12px 12px 0 0;
+            margin-top: 40px;
+            border-top: 3px solid #3498db;
+        }
+
+        .citation {
+            background: rgba(52, 152, 219, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(52, 152, 219, 0.3);
+        }
+
+        .citation h3 {
+            color: #3498db;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .citation p {
+            color: #bdc3c7;
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+
+        .citation a {
+            color: #3498db;
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .citation a:hover {
+            border-bottom-color: #3498db;
+        }
+
+        .methodology {
+            color: #95a5a6;
+            font-size: 0.95rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Canvas styling */
+        canvas {
+            background: transparent;
+            border-radius: 8px;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            header {
+                padding: 30px 15px;
+                margin-bottom: 30px;
+            }
+            
+            .main-content {
+                gap: 30px;
+            }
+            
+            .doughnut-container {
+                padding: 30px 15px;
+                min-height: 500px;
+            }
+            
+            .instructions {
+                padding: 20px;
+            }
+            
+            .legend-item {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .doughnut-container {
+                min-height: 400px;
+            }
+        }
+        
+        /* Status bar for loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #95a5a6;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>California Doughnut Economics Snapshot</h1>
+            <p class="subtitle">Based on the CalDEC California Doughnut Report (2025) — 42 social and ecological indicators</p>
+            
+            <div class="overview">
+                <p><strong>Social Foundation:</strong> 100% of California's social indicators are in shortfall</p>
+                <p><strong>Ecological Ceiling:</strong> 89% of California's ecological indicators are in overshoot</p>
+                <p>This visualization shows California's performance across Kate Raworth's Doughnut Economics framework.</p>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="doughnut-container">
+                <div class="doughnut-wrapper">
+                    <div id="doughnutDiv">
+                        <canvas id="doughnutCanvas">Your browser does not support the HTML5 canvas tag.</canvas>
+                    </div>
+                    <div class="loading" id="loading">Loading California doughnut data...</div>
+                </div>
+            </div>
+
+            <div class="instructions">
+                <h2>How to Explore</h2>
+                <p><strong>Hover</strong> over any segment to see a quick preview with key information.</p>
+                <p><strong>Click</strong> any segment to open the detailed panel with full data, context, and actionable steps you can take.</p>
+                <p>The inner ring shows <strong>social foundation</strong> indicators — areas where people may be falling short of basic needs.</p>
+                <p>The outer ring shows <strong>ecological ceiling</strong> indicators — areas where we're exceeding planetary boundaries.</p>
+
+                <div class="legend">
+                    <h3>Color Guide</h3>
+                    <div class="legend-item">
+                        <div class="legend-color thriving"></div>
+                        <span>Thriving / Within Limits</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color good"></div>
+                        <span>Good Performance</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color near"></div>
+                        <span>Near Threshold</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color concerning"></div>
+                        <span>Concerning</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color shortfall"></div>
+                        <span>Shortfall / Overshoot</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color severe"></div>
+                        <span>Severe Shortfall / Critical Overshoot</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color unknown"></div>
+                        <span>Data Not Available</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detail Panel -->
+        <div id="detailPanel" class="detail-panel">
+            <div class="detail-header">
+                <h3>Select an indicator</h3>
+                <button class="close-btn" onclick="window.doughnut._hideDetailPanel()">&times;</button>
+            </div>
+            <div class="detail-content">
+                <p>Click on any segment of the doughnut to view detailed information about that indicator.</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="citation">
+            <h3>Data Source</h3>
+            <p>Aritza & Kraus-Polk et al., 2025. <em>The California Doughnut Snapshot and Report</em>. CalDEC/Zenodo.</p>
+            <p><a href="https://zenodo.org/records/17540639" target="_blank" rel="noopener noreferrer">View Full Report on Zenodo →</a></p>
+        </div>
+        
+        <div class="methodology">
+            <p>This interactive visualization is built on the Doughnut Economics framework developed by Kate Raworth, measuring social foundations and ecological ceilings. The California data represents state-level performance across 42 indicators as analyzed by the California Doughnut Economics Collaborative (CalDEC).</p>
+            <p style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #333;">
+                Visualization powered by the open-source <a href="https://github.com/flodskum/doughnut-economics-graph" target="_blank" rel="noopener noreferrer">Doughnut Economics Graph</a> project.
+            </p>
+        </div>
+    </footer>
+
+    <!-- Load the JavaScript files -->
+    <script src="california-data.js"></script>
+    <script src="doughnut-interactive.js"></script>
+
+    <script>
+        // Initialize the interactive doughnut
+        window.doughnut = null;
+
+        function initializeDoughnut() {
+            try {
+                // Create the interactive doughnut
+                window.doughnut = new InteractiveDoughnut(
+                    600,          // size
+                    1.0,          // donut scale
+                    14,           // text size
+                    "doughnutCanvas",  // canvas id
+                    "doughnutDiv",     // div id
+                    null,              // info id (not used)
+                    null,              // inner id (not used)
+                    null,              // outer id (not used)
+                    null,              // export id (not used)
+                    "detailPanel"      // detail panel id
+                );
+
+                // Load the California data
+                window.doughnut.loadData(CALIFORNIA_DOUGHNUT_DATA);
+                
+                // Set colors for global/local doughnut style
+                window.doughnut.setColours(2); // Global style
+                
+                // Hide loading message
+                document.getElementById('loading').style.display = 'none';
+                
+                console.log('California Doughnut loaded successfully');
+                console.log('Social indicators:', CALIFORNIA_DOUGHNUT_DATA.social.length);
+                console.log('Ecological indicators:', CALIFORNIA_DOUGHNUT_DATA.ecological.length);
+                
+            } catch (error) {
+                console.error('Error initializing doughnut:', error);
+                document.getElementById('loading').innerHTML = 'Error loading data. Please check the console.';
+            }
+        }
+
+        // Handle responsive canvas sizing
+        function handleResize() {
+            if (window.doughnut) {
+                const container = document.getElementById('doughnutDiv');
+                const maxSize = Math.min(window.innerWidth - 80, 600);
+                const size = Math.max(350, maxSize);
+                
+                // Note: For full responsiveness, the original Doughnut class would need
+                // to support dynamic resizing. For now, we reload with appropriate size.
+                if (window.innerWidth <= 768 && window.doughnut._donutSize > 500) {
+                    // Reinitialize with smaller size for mobile
+                    window.doughnut = new InteractiveDoughnut(
+                        450, 1.0, 12, "doughnutCanvas", "doughnutDiv", 
+                        null, null, null, null, "detailPanel"
+                    );
+                    window.doughnut.loadData(CALIFORNIA_DOUGHNUT_DATA);
+                    window.doughnut.setColours(2);
+                }
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDoughnut();
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', handleResize);
+        
+        // Handle escape key to close detail panel
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && window.doughnut) {
+                window.doughnut._hideDetailPanel();
+            }
+        });
+
+        // Add click outside to close detail panel
+        document.addEventListener('click', function(e) {
+            const panel = document.getElementById('detailPanel');
+            const canvas = document.getElementById('doughnutCanvas');
+            
+            if (panel && panel.classList.contains('visible') && 
+                !panel.contains(e.target) && !canvas.contains(e.target)) {
+                if (window.doughnut) {
+                    window.doughnut._hideDetailPanel();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
